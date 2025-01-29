@@ -14,6 +14,8 @@ class FLAPPYBIRD_API AFlappyBirdGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
+	AFlappyBirdGameMode();
+
 
 	UPROPERTY(EditAnywhere, Category = "Spawning")
 	TSubclassOf<class APawn> BirdPawnClass;

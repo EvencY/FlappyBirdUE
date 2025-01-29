@@ -2,6 +2,20 @@
 
 
 #include "FlappyBirdGameMode.h"
+#include "BirdPawn.h"
+
+
+
+AFlappyBirdGameMode::AFlappyBirdGameMode()
+{
+	static ConstructorHelpers::FClassFinder<APawn> PawnClassFinder(TEXT("/Script/CoreUObject.Class'/Script/FlappyBird.BirdPawn'"));
+
+
+	if (PawnClassFinder.Succeeded())
+	{
+		DefaultPawnClass = PawnClassFinder.Class;
+	}
+}
 
 
 void AFlappyBirdGameMode::BeginPlay()

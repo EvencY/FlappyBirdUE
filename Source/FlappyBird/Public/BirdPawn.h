@@ -19,6 +19,12 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* MeshComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	FVector BirdSpawnPoint = FVector(0.0f, 0.0f, 500.0f);
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -26,4 +32,6 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+private:
+	
 };
