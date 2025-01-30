@@ -15,22 +15,35 @@ public:
 	// Sets default values for this pawn's properties
 	ABirdPawn();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* MeshComponent;
-
-	UPROPERTY(VisibleAnywhere)
-	FVector BirdSpawnPoint = FVector(0.0f, 0.0f, 500.0f);
-
-public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UPROPERTY(VisibleAnywhere)
+	class UBoxComponent* BirdCollider;
+	
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* BirdMeshComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* LeftWingMeshComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* RightWingMeshComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	FRotator BirdRotation = FRotator(0.0f, 90.0f, 0.0f);
+
+	UPROPERTY(VisibleAnywhere)
+	FVector BirdSpawnPoint = FVector(0.0f, -200.0f, 500.0f);
+
 
 private:
 	

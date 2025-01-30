@@ -19,21 +19,7 @@ class FLAPPYBIRD_API AFlappyBirdGameMode : public AGameModeBase
 
 	UPROPERTY(EditAnywhere, Category = "Spawning")
 	TSubclassOf<class APawn> BirdPawnClass;
-
-	UPROPERTY(EditAnywhere, Category = "Spawning")
-	AActor* SpawnPoint;
 	
 	void BeginPlay();
-
-
-	UFUNCTION(BlueprintCallable)
-	void SetSpawnPoint(AActor* NewSpawnPoint);
-
-	UFUNCTION(BlueprintCallable)
-	void SetBirdPawn(TSubclassOf<class APawn> NewBirdPawn);
-
-	UFUNCTION(BlueprintCallable)
-	void SpawnBird();
-
 };
 

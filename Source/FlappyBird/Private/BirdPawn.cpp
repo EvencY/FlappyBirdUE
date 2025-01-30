@@ -3,6 +3,7 @@
 
 #include "BirdPawn.h"
 #include <EngineUtils.h>
+#include "Components/BoxComponent.h"
 
 // Sets default values
 ABirdPawn::ABirdPawn()
@@ -10,19 +11,21 @@ ABirdPawn::ABirdPawn()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
-	RootComponent = MeshComponent;
 
-	MeshComponent->SetEnableGravity(true);
-	MeshComponent->SetSimulatePhysics(true);
-
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAsset(TEXT("/Script/Engine.StaticMesh'/Game/Models/brd.brd'"));
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 	
-	if (MeshAsset.Succeeded())
-	{
-		MeshComponent->SetStaticMesh(MeshAsset.Object);
-		MeshComponent->SetRelativeScale3D(FVector(10.f));
-	}
+	BirdMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BirdMeshComponent"));
+	BirdMeshComponent->SetupAttachment(RootComponent);
+
+	LeftWingMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LeftWingMeshComponent"));
+	LeftWingMeshComponent->SetupAttachment(BirdMeshComponent);
+
+	RightWingMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RightWingMeshComponent"));
+	RightWingMeshComponent->SetupAttachment(BirdMeshComponent);
+
+	BirdCollider = CreateDefaultSubobject <UBoxComponent>(TEXT("BirdCollider"));
+	BirdCollider->InitBoxExtent(FVector(50.f, 5.f, 40.f));
+
 }
 
 // Called when the game starts or when spawned
@@ -30,8 +33,12 @@ void ABirdPawn::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	//Set Bird's position at the start
+	//Transform
 	SetActorLocation(BirdSpawnPoint);
+	SetActorRotation(BirdRotation);
+	
+	BirdMeshComponent->SetEnableGravity(true);
+	BirdMeshComponent->SetSimulatePhysics(true);
 }
 
 // Called every frame
