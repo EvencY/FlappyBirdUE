@@ -17,37 +17,65 @@ public:
 	// Sets default values for this actor's properties
 	AObstacleSpawner();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
 	float SpawnInterval = 2.f;
 
+
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 	
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<class AObstacle> ObstacleClass;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
+	TSubclassOf<class AObstacle> ObstacleClass;
+	
 
 
 private:
-	UFUNCTION()
-	void SpawnObstacle();
+	UPROPERTY(VisibleAnywhere, Category = "Spawning")
+	TArray<AObstacle*> ObstaclePool;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Spawning")
 	FVector SpawnPosition = FVector(0.f, 1500.f, 0.f);
 
-	UPROPERTY(VisibleAnywhere)
-	float ZOffset = 150.f;
-
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Spawning")
 	FRotator SpawnRotation = FRotator(0.f, 90.f, 0.f);
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Spawning")
+	bool bIsAbove = true;
+
+	UPROPERTY(VisibleAnywhere, Category = "Spawning")
+	float DefaultZOffset = -150.f;
+
+	UPROPERTY(VisibleAnywhere, Category = "Spawning")
+	float ZOffset = 0.f;
+
+	UPROPERTY(VisibleAnywhere, Category = "Spawning")
 	float TimeToSpawn = 0.f;
-	
+
+	UPROPERTY(VisibleAnywhere, Category = "Spawning")
+	int32 ObstaclePoolSize = 15;
+
+	UPROPERTY(VisibleAnywhere, Category = "Spawning")
+	float MinZRange = 0.f;
+
+	UPROPERTY(VisibleAnywhere, Category = "Spawning")
+	float MaxZRange = 150.f;
+
+
+
+	UFUNCTION(BlueprintCallable, Category = "Spawning")
+	void SpawnObstacle();
+
+	UFUNCTION(BlueprintCallable, Category="Spawning")
+	void InitializeObstaclePool(int32 PoolSize);
+
+	UFUNCTION(BlueprintCallable, Category = "Spawning")
+	float SetSpawnLocationZInRange(float minRange, float maxRange);
+
 };

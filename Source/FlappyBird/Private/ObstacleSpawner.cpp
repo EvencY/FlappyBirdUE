@@ -16,6 +16,7 @@ void AObstacleSpawner::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	InitializeObstaclePool(ObstaclePoolSize);
 }
 
 // Called every frame
@@ -27,29 +28,73 @@ void AObstacleSpawner::Tick(float DeltaTime)
 
 	if (TimeToSpawn <= 0)
 	{
+		//Random obstacle Z position
+		SpawnPosition.Z = SetSpawnLocationZInRange(MinZRange, MaxZRange);
+
 		SpawnObstacle();
 	}
 }
 
 void AObstacleSpawner::SpawnObstacle()
 {
-	if (ObstacleClass)
+	if (!ObstacleClass)
 	{
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = this;
+		UE_LOG(LogTemp, Error, TEXT("ObstacleClass is not valid!"));
+		return;
+	}
 
-		ZOffset = FMath::RandRange(0.f, 300.f);
-		SpawnPosition.Z = -ZOffset;
+	//Get hidden obstacle from pool and activate it
+	for (AObstacle* Obstacle : ObstaclePool)
+	{
+		if (Obstacle->IsHidden())
+		{
+			Obstacle->SetActorLocation(SpawnPosition);
+			Obstacle->SetActorRotation(SpawnRotation);
+			Obstacle->SetActorHiddenInGame(false);
+			Obstacle->SetActorEnableCollision(true);
 
-		GetWorld()->SpawnActor<AObstacle>(ObstacleClass, SpawnPosition, SpawnRotation);
+			//Wait before spawning another obstacle
+			TimeToSpawn = SpawnInterval;
+			return;
+		}
+	}
 
-		//AObstacle* NewObstacle = GetWorld()->SpawnActor<AObstacle>(ObstacleClass, SpawnPosition, SpawnRotation, SpawnParams);
+	
+}
+
+void AObstacleSpawner::InitializeObstaclePool(int32 PoolSize)
+{
+	if (!ObstacleClass)
+	{
+		UE_LOG(LogTemp, Error, TEXT("ObstacleClass is not valid!"));
+		return;
+	}
+
+	for (int i = 0; i < PoolSize; i++)
+	{
+		AObstacle* Obstacle = GetWorld()->SpawnActor<AObstacle>(ObstacleClass, FVector::ZeroVector, FRotator::ZeroRotator);
+		Obstacle->SetActorHiddenInGame(true);
+		Obstacle->SetActorEnableCollision(false);
+		ObstaclePool.Add(Obstacle);
+	}
+}
+
+float AObstacleSpawner::SetSpawnLocationZInRange(float minRange, float maxRange)
+{
+	ZOffset = FMath::RandRange(minRange, maxRange);
+	float ResultZValue = 0.f;
+
+	//For more variety in spawning altitude (above/below default position)
+	if (bIsAbove)
+	{
+		ResultZValue = DefaultZOffset + ZOffset;
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("ObstacleClass is not valid!"));
+		ResultZValue = DefaultZOffset - ZOffset;
 	}
 
-	TimeToSpawn = SpawnInterval;
+	bIsAbove = !bIsAbove;
+	return ResultZValue;
 }
 

@@ -14,17 +14,20 @@ ABirdPawn::ABirdPawn()
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 	
+	// Bird mesh
 	BirdMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BirdMeshComponent"));
 	BirdMeshComponent->SetupAttachment(RootComponent);
 
+	// Wings
 	LeftWingMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LeftWingMeshComponent"));
 	LeftWingMeshComponent->SetupAttachment(BirdMeshComponent);
-
 	RightWingMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RightWingMeshComponent"));
 	RightWingMeshComponent->SetupAttachment(BirdMeshComponent);
 
+	// Bird collider
 	BirdCollider = CreateDefaultSubobject <UBoxComponent>(TEXT("BirdCollider"));
 	BirdCollider->InitBoxExtent(FVector(50.f, 5.f, 40.f));
+	BirdCollider->SetupAttachment(BirdMeshComponent);
 
 }
 
@@ -33,10 +36,11 @@ void ABirdPawn::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	//Transform
+	// Set start position and rotation
 	SetActorLocation(BirdSpawnPoint);
 	SetActorRotation(BirdRotation);
 	
+	// Physics
 	BirdMeshComponent->SetEnableGravity(true);
 	BirdMeshComponent->SetSimulatePhysics(true);
 }

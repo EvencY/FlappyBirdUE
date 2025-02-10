@@ -21,7 +21,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
 	class UBoxComponent* BirdCollider;
 	
 
@@ -29,19 +29,19 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
 	UStaticMeshComponent* BirdMeshComponent;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
 	UStaticMeshComponent* LeftWingMeshComponent;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
 	UStaticMeshComponent* RightWingMeshComponent;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
 	FRotator BirdRotation = FRotator(0.0f, 90.0f, 0.0f);
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
 	FVector BirdSpawnPoint = FVector(0.0f, -200.0f, 500.0f);
 
 

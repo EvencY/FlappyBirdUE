@@ -15,34 +15,36 @@ public:
 	// Sets default values for this actor's properties
 	AObstacle();
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Obstacle")
 	class UBoxComponent* LowerObstacleCollider;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Obstacle")
 	class UBoxComponent* UpperObstacleCollider;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Obstacle")
 	class UBoxComponent* ScoreCollider;
+
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Obstacle")
+	FVector MoveSpeed = FVector(0.f, -200.f, 0.f);
 
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Obstacle")
 	UStaticMeshComponent* LowerObstacleMeshComponent;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Obstacle")
 	UStaticMeshComponent* UpperObstacleMeshComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int YBound = 1500;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Obstacle")
+	int32 YBound = 1500;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+private:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector MoveSpeed = FVector(0.f, -200.f, 0.f);
 
 };
