@@ -44,7 +44,7 @@ private:
 	FVector SpawnPosition = FVector(0.f, 1500.f, 0.f);
 
 	UPROPERTY(VisibleAnywhere, Category = "Spawning")
-	FRotator SpawnRotation = FRotator(0.f, 90.f, 0.f);
+	FRotator SpawnRotation = FRotator(0.f, 0.f, 0.f);
 
 	UPROPERTY(VisibleAnywhere, Category = "Spawning")
 	bool bIsAbove = true;

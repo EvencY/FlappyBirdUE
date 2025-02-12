@@ -27,6 +27,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	//Must be same as Floor MoveSpeed
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Obstacle")
 	FVector MoveSpeed = FVector(0.f, -200.f, 0.f);
 
