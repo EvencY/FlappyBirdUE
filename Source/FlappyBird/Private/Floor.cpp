@@ -34,7 +34,7 @@ void AFloor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//Move floor to the left with the same speed as Obstacles
+	// Move floor to the left with the same speed as Obstacles
 	SetActorLocation(GetActorLocation() + (MoveSpeed * DeltaTime));
 
 }

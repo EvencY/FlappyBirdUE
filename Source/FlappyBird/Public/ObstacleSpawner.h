@@ -18,8 +18,7 @@ public:
 	AObstacleSpawner();
 
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
-	float SpawnInterval = 2.f;
+	
 
 
 	// Called every frame
@@ -33,6 +32,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
 	TSubclassOf<class AObstacle> ObstacleClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
+	float SpawnInterval = 2.f;
 	
 
 

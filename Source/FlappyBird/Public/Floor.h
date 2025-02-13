@@ -21,9 +21,7 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Floor")
 	class UBoxComponent* FloorCollider;
 
-	//Must be same as Obstacle MoveSpeed
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Floor")
-	FVector MoveSpeed = FVector(0.f, -200.f, 0.f);
+	
 
 	
 
@@ -38,4 +36,8 @@ protected:
 	UStaticMeshComponent* FloorMeshComponent2;
 
 private:	
+	// Must be same as Obstacle MoveSpeed
+	UPROPERTY(VisibleAnywhere, Category = "Floor")
+	FVector MoveSpeed = FVector(0.f, -200.f, 0.f);
+
 };

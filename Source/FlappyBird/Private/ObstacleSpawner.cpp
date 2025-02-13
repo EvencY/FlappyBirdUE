@@ -28,7 +28,7 @@ void AObstacleSpawner::Tick(float DeltaTime)
 
 	if (TimeToSpawn <= 0)
 	{
-		//Random obstacle Z position
+		// Random obstacle Z position
 		SpawnPosition.Z = SetSpawnLocationZInRange(MinZRange, MaxZRange);
 
 		SpawnObstacle();
@@ -43,7 +43,7 @@ void AObstacleSpawner::SpawnObstacle()
 		return;
 	}
 
-	//Get hidden obstacle from pool and activate it
+	// Get hidden obstacle from pool and activate it
 	for (AObstacle* Obstacle : ObstaclePool)
 	{
 		if (Obstacle->IsHidden())
@@ -53,7 +53,7 @@ void AObstacleSpawner::SpawnObstacle()
 			Obstacle->SetActorHiddenInGame(false);
 			Obstacle->SetActorEnableCollision(true);
 
-			//Wait before spawning another obstacle
+			// Wait before spawning another obstacle
 			TimeToSpawn = SpawnInterval;
 			return;
 		}
@@ -84,7 +84,7 @@ float AObstacleSpawner::SetSpawnLocationZInRange(float minRange, float maxRange)
 	ZOffset = FMath::RandRange(minRange, maxRange);
 	float ResultZValue = 0.f;
 
-	//For more variety in spawning altitude (above/below default position)
+	// For more variety in spawning altitude (above/below default position)
 	if (bIsAbove)
 	{
 		ResultZValue = DefaultZOffset + ZOffset;

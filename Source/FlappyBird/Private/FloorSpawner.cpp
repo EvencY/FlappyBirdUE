@@ -22,39 +22,9 @@ void AFloorSpawner::BeginPlay()
 		return;
 	}
 
-	// Because every Floor object contains two ground meshes, distance is divided by 2
 	DistanceBetweenFloorParts = FMath::Abs(FloorPool[0]->GetActorLocation().Y - FloorPool[1]->GetActorLocation().Y);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, FString::Printf(TEXT("Distance: %.2f"), DistanceBetweenFloorParts));
-
-	// Set LeftFloor
-	//for (AFloor* Floor : FloorPool)
-	//{
-	//	if (!LeftFloor)
-	//	{
-	//		LeftFloor = Floor;
-	//	}
-	//	else if (Floor->GetActorLocation().Y < LeftFloor->GetActorLocation().Y)
-	//	{
-	//		LeftFloor = Floor;
-	//	}
-	//}
-
-	//for (int i = 0; i < FloorPool.Num(); i++)
-	//{
-	//	if (LeftFloorIndex == -1)
-	//	{
-	//		LeftFloorIndex = i;
-	//	}
-	//	else if (FloorPool[i]->GetActorLocation().Y < FloorPool[LeftFloorIndex]->GetActorLocation().Y)
-	//	{
-	//		LeftFloorIndex = i;
-	//	}
-
-	//}
 
 	SetLeftFloorIndex();
-
-	YBound = -3000;
 }
 
 // Called every frame
@@ -62,10 +32,15 @@ void AFloorSpawner::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// When left Floor object is out of bonds move it just behind right Floor
 	if (FloorPool[LeftFloorIndex]->GetActorLocation().Y < YBound)
 	{
-		FVector NewLocation = FVector(FloorPool[LeftFloorIndex]->GetActorLocation().X, FloorPool[LeftFloorIndex]->GetActorLocation().Y + (DistanceBetweenFloorParts * 2), FloorPool[LeftFloorIndex]->GetActorLocation().Z);
-		FloorPool[LeftFloorIndex]->SetActorLocation(NewLocation);
+		FloorPool[LeftFloorIndex]->SetActorLocation(
+			FloorPool[LeftFloorIndex]->GetActorLocation() +
+			FVector(0.f, DistanceBetweenFloorParts * 2, 0.f)
+		);
+
+		// LeftFloorIndex points to object that is right and it needs to be set again
 		SetLeftFloorIndex();
 	}
 }
@@ -76,13 +51,8 @@ void AFloorSpawner::SetLeftFloorIndex()
 	{
 		if (FloorPool[i]->GetActorLocation().Y < FloorPool[LeftFloorIndex]->GetActorLocation().Y)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Cyan, FString::Printf(TEXT("i Floor Pos: %.2f"), FloorPool[i]->GetActorLocation().Y));
-			GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Cyan, FString::Printf(TEXT("current left Floor Pos: %.2f"), FloorPool[LeftFloorIndex]->GetActorLocation().Y));
 			LeftFloorIndex = i;
 		}
-
 	}
-
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, FString::Printf(TEXT("LF INDEX: %i"), LeftFloorIndex));
 }
 

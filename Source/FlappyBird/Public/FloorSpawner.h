@@ -33,13 +33,10 @@ protected:
 	TArray<AFloor*> FloorPool;
 
 	UPROPERTY(VisibleAnywhere, Category = "FloorSpawner")
-	AFloor* LeftFloor = nullptr;
-
-	UPROPERTY(VisibleAnywhere, Category = "FloorSpawner")
 	int LeftFloorIndex = 0;
 
 	UPROPERTY(VisibleAnywhere, Category = "FloorSpawner")
-	float YBound = 0.f;
+	float YBound = -3000.f;
 
 
 private:	

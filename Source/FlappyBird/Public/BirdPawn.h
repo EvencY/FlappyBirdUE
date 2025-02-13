@@ -29,6 +29,13 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	
+
+	UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
+	FVector BirdSpawnPoint = FVector(0.0f, -200.0f, 500.0f);
+
+
+private:
 	UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
 	UStaticMeshComponent* BirdMeshComponent;
 
@@ -38,13 +45,4 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
 	UStaticMeshComponent* RightWingMeshComponent;
 
-	UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
-	FRotator BirdRotation = FRotator(0.0f, 90.0f, 0.0f);
-
-	UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
-	FVector BirdSpawnPoint = FVector(0.0f, -200.0f, 500.0f);
-
-
-private:
-	
 };

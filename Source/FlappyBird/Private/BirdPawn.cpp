@@ -18,7 +18,7 @@ ABirdPawn::ABirdPawn()
 	BirdMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BirdMeshComponent"));
 	BirdMeshComponent->SetupAttachment(RootComponent);
 
-	// Wings
+	// Wings mesh
 	LeftWingMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LeftWingMeshComponent"));
 	LeftWingMeshComponent->SetupAttachment(BirdMeshComponent);
 	RightWingMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RightWingMeshComponent"));
@@ -38,7 +38,7 @@ void ABirdPawn::BeginPlay()
 	
 	// Set start position and rotation
 	SetActorLocation(BirdSpawnPoint);
-	SetActorRotation(BirdRotation);
+	SetActorRotation(FRotator::ZeroRotator);
 	
 	// Physics
 	BirdMeshComponent->SetEnableGravity(true);
