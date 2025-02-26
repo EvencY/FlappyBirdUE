@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include <InputMappingContext.h>
 #include "BirdPawn.generated.h"
+
 
 UCLASS()
 class FLAPPYBIRD_API ABirdPawn : public APawn
@@ -34,6 +36,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
 	FVector BirdSpawnPoint = FVector(0.0f, -200.0f, 500.0f);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UInputAction* PauseInputAction;
+
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
@@ -45,4 +50,9 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
 	UStaticMeshComponent* RightWingMeshComponent;
 
+	UFUNCTION(BlueprintCallable)
+	void HandlePauseInput();
+
+	UFUNCTION()
+	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 };
