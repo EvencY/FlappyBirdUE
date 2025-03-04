@@ -22,15 +22,24 @@ void AFlappyBirdGameMode::BeginPlay()
 
 void AFlappyBirdGameMode::SetGameState(EFlappyBirdGameState NewState)
 {
+	if (CurrentGameState == NewState)
+	{
+		return;
+	}
+
+
 	CurrentGameState = NewState;
+	OnGameStateChanged.Broadcast(CurrentGameState);
 
 	switch (CurrentGameState)
 	{
 		case EFlappyBirdGameState::Playing:
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, TEXT("State: Playing"));
 			UGameplayStatics::SetGamePaused(GetWorld(), false);
 			break;
 
 		case EFlappyBirdGameState::Paused:
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, TEXT("State: Paused"));
 			UGameplayStatics::SetGamePaused(GetWorld(), true);
 			break;
 

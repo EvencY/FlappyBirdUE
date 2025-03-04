@@ -18,6 +18,8 @@ enum class EFlappyBirdGameState : uint8
 	GameOver
 };
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnGameStateChangedDelegate, EFlappyBirdGameState);
+
 
 UCLASS()
 class FLAPPYBIRD_API AFlappyBirdGameMode : public AGameModeBase
@@ -30,14 +32,20 @@ public:
 	
 	void BeginPlay();
 
+	FOnGameStateChangedDelegate OnGameStateChanged;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	EFlappyBirdGameState CurrentGameState;
+	
 
 	UFUNCTION(BlueprintCallable)
 	void SetGameState(EFlappyBirdGameState NewState);
 
 	UFUNCTION(BlueprintCallable)
 	EFlappyBirdGameState GetCurrentGameState();
+
+
+
+private:
+	UPROPERTY(VisibleAnywhere)
+	EFlappyBirdGameState CurrentGameState;
 };
 

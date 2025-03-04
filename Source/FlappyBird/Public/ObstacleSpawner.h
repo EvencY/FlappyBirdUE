@@ -80,4 +80,8 @@ private:
 	UFUNCTION(BlueprintCallable, Category = "Spawning")
 	float SetSpawnLocationZInRange(float minRange, float maxRange);
 
+	bool bIsGameOver = false;
+
+	void HandleGameStateChanged(EFlappyBirdGameState NewState);
+
 };

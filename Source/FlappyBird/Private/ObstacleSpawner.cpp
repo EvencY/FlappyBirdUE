@@ -17,12 +17,23 @@ void AObstacleSpawner::BeginPlay()
 	Super::BeginPlay();
 	
 	InitializeObstaclePool(ObstaclePoolSize);
+
+	if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		GameMode->OnGameStateChanged.AddUObject(this, &AObstacleSpawner::HandleGameStateChanged);
+	}
 }
 
 // Called every frame
 void AObstacleSpawner::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// Stop when game is over
+	if (bIsGameOver)
+	{
+		return;
+	}
 
 	TimeToSpawn -= DeltaTime;
 
@@ -96,5 +107,13 @@ float AObstacleSpawner::SetSpawnLocationZInRange(float minRange, float maxRange)
 
 	bIsAbove = !bIsAbove;
 	return ResultZValue;
+}
+
+void AObstacleSpawner::HandleGameStateChanged(EFlappyBirdGameState NewState)
+{
+	if (NewState == EFlappyBirdGameState::GameOver)
+	{
+		bIsGameOver = true;
+	}
 }
 

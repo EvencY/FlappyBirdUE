@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include <InputMappingContext.h>
+#include <FlappyBirdGameMode.h>
 #include "BirdPawn.generated.h"
 
 
@@ -36,8 +37,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
 	FVector BirdSpawnPoint = FVector(0.0f, -200.0f, 500.0f);
 
+
+	// Need to be set in editor
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UInputAction* PauseInputAction;
+
+	// Need to be set in editor
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UInputAction* JumpInputAction;
 
 
 private:
@@ -53,6 +60,13 @@ private:
 	UFUNCTION(BlueprintCallable)
 	void HandlePauseInput();
 
+	UFUNCTION(BlueprintCallable)
+	void HandleJumpInput();
+
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
+
+	bool bIsGameOver = false;
+
+	void HandleGameStateChanged(EFlappyBirdGameState NewState);
 };

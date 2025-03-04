@@ -27,12 +27,33 @@ AFloor::AFloor()
 void AFloor::BeginPlay()
 {
 	Super::BeginPlay();
+
+
+	// Subscribe to OnGameStateChanged delegate
+	if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		GameMode->OnGameStateChanged.AddUObject(this, &AFloor::HandleGameStateChanged);
+	}
+}
+
+void AFloor::HandleGameStateChanged(EFlappyBirdGameState NewState)
+{
+	if (NewState == EFlappyBirdGameState::GameOver)
+	{
+		bIsGameOver = true;
+	}
 }
 
 // Called every frame
 void AFloor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// Don't move when game is over (bird's dead - not flying forward anymore)
+	if (bIsGameOver)
+	{
+		return;
+	}
 
 	// Move floor to the left with the same speed as Obstacles
 	SetActorLocation(GetActorLocation() + (MoveSpeed * DeltaTime));

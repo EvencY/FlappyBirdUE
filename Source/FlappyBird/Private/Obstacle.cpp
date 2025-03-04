@@ -42,7 +42,22 @@ AObstacle::AObstacle()
 void AObstacle::BeginPlay()
 {
 	Super::BeginPlay();
+
+
+	// Subscribe to OnGameStateChanged delegate
+	if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		GameMode->OnGameStateChanged.AddUObject(this, &AObstacle::HandleGameStateChanged);
+	}
 	
+}
+
+void AObstacle::HandleGameStateChanged(EFlappyBirdGameState NewState)
+{
+	if (NewState == EFlappyBirdGameState::GameOver)
+	{
+		bIsGameOver = true;
+	}
 }
 
 
@@ -51,15 +66,23 @@ void AObstacle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// Move obstacle when it's active
-	if(!IsHidden())
+	// If obstacle is hidden do nothing
+	if(IsHidden())
 	{
-		SetActorLocation(GetActorLocation() + (MoveSpeed * DeltaTime));
+		return;
 	}
+
+	if (bIsGameOver)
+	{
+		return;
+	}
+
+	//When obstacle isn't hidden and game is not over move obstacle
+	SetActorLocation(GetActorLocation() + (MoveSpeed * DeltaTime));
 
 
 	// Deactivate obstacle when it's out of bounds
-	if (!IsHidden() && GetActorLocation().Y < -YBound) 
+	if (GetActorLocation().Y < -YBound) 
 	{
 		SetActorHiddenInGame(true);
 		SetActorEnableCollision(false);

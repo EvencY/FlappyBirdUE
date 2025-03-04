@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include <FlappyBirdGameMode.h>
 #include "Obstacle.generated.h"
+
 
 UCLASS()
 class FLAPPYBIRD_API AObstacle : public AActor
@@ -47,5 +49,9 @@ private:
 	// Must be same as Floor MoveSpeed
 	UPROPERTY(VisibleAnywhere, Category = "Obstacle")
 	FVector MoveSpeed = FVector(0.f, -200.f, 0.f);
+
+	bool bIsGameOver = false;
+
+	void HandleGameStateChanged(EFlappyBirdGameState NewState);
 
 };

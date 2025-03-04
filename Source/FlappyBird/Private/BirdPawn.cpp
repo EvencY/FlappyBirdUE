@@ -4,8 +4,8 @@
 #include "BirdPawn.h"
 #include <EngineUtils.h>
 #include "Components/BoxComponent.h"
-#include <FlappyBirdGameMode.h>
 #include <EnhancedInputComponent.h>
+#include <EnhancedInputSubsystems.h>
 
 // Sets default values
 ABirdPawn::ABirdPawn()
@@ -19,7 +19,7 @@ ABirdPawn::ABirdPawn()
 	// Bird collider
 	BirdCollider = CreateDefaultSubobject <UBoxComponent>(TEXT("BirdCollider"));
 	SetRootComponent(BirdCollider);
-	BirdCollider->InitBoxExtent(FVector(50.f, 5.f, 40.f));
+	BirdCollider->InitBoxExtent(FVector(5.f, 40.f, 30.f));
 
 
 	// Bird mesh
@@ -31,9 +31,6 @@ ABirdPawn::ABirdPawn()
 	LeftWingMeshComponent->SetupAttachment(BirdMeshComponent);
 	RightWingMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RightWingMeshComponent"));
 	RightWingMeshComponent->SetupAttachment(BirdMeshComponent);
-
-	
-
 }
 
 // Called when the game starts or when spawned
@@ -46,11 +43,18 @@ void ABirdPawn::BeginPlay()
 	SetActorRotation(FRotator::ZeroRotator);
 	
 	// Physics
-	BirdMeshComponent->SetEnableGravity(true);
-	BirdMeshComponent->SetSimulatePhysics(true);
+	BirdCollider->SetEnableGravity(true);
+	BirdCollider->SetSimulatePhysics(true);
 
 	BirdCollider->OnComponentHit.AddDynamic(this, &ABirdPawn::OnHit);
-	//BirdCollider->OnComponentBeginOverlap
+	//BirdCollider->OnComponentBeginOverlap(this, &ABirdPawn::OnHit);
+
+
+	if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		GameMode->OnGameStateChanged.AddUObject(this, &ABirdPawn::HandleGameStateChanged);
+	}
+	
 }
 
 void ABirdPawn::HandlePauseInput()
@@ -70,14 +74,44 @@ void ABirdPawn::HandlePauseInput()
 	}
 }
 
+void ABirdPawn::HandleJumpInput()
+{
+	if (bIsGameOver)
+	{
+		return;
+	}
+
+	if (UPrimitiveComponent* RootPrimitive = Cast<UPrimitiveComponent>(GetRootComponent()))
+	{
+		if (RootPrimitive->IsSimulatingPhysics())
+		{
+			RootPrimitive->SetPhysicsLinearVelocity(FVector::ZeroVector);
+			FVector UppwardForce = FVector(0, 0, 1000000);
+			RootPrimitive->AddForce(UppwardForce);
+		}
+	}
+}
+
 void ABirdPawn::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, TEXT("Hit!"));
 	if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(GetWorld()->GetAuthGameMode()))
 	{
+		if (GameMode->GetCurrentGameState() == EFlappyBirdGameState::GameOver)
+		{
+			return;
+		}
 		GameMode->SetGameState(EFlappyBirdGameState::GameOver);
 	}
 }
+
+void ABirdPawn::HandleGameStateChanged(EFlappyBirdGameState NewState)
+{
+	if (NewState == EFlappyBirdGameState::GameOver)
+	{
+		bIsGameOver = true;
+	}
+}
+
 
 // Called every frame
 void ABirdPawn::Tick(float DeltaTime)
@@ -96,5 +130,6 @@ void ABirdPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Input->BindAction(PauseInputAction, ETriggerEvent::Triggered, this, &ABirdPawn::HandlePauseInput);
 	PauseInputAction->bTriggerWhenPaused = true;
 
+	Input->BindAction(JumpInputAction, ETriggerEvent::Triggered, this, &ABirdPawn::HandleJumpInput);
 }
 
