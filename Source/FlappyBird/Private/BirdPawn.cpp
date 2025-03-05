@@ -101,6 +101,46 @@ void ABirdPawn::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPr
 			return;
 		}
 		GameMode->SetGameState(EFlappyBirdGameState::GameOver);
+
+		//Add some effects on death 
+		LeftWingMeshComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		RightWingMeshComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+
+		LeftWingMeshComponent->SetSimulatePhysics(true);
+		RightWingMeshComponent->SetSimulatePhysics(true);
+
+		LeftWingMeshComponent->SetEnableGravity(true);
+		RightWingMeshComponent->SetEnableGravity(true);
+
+		LeftWingMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		RightWingMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+
+		float WingZPos = LeftWingMeshComponent->GetComponentLocation().Z;
+		float HitZPos = Hit.Location.Z;
+
+		float ImpulseStrength = 1000.0f;
+
+
+		// Check whether hit point was above or below wings to add proper impulse direction after death
+		if (WingZPos > HitZPos)
+		{
+			LeftWingMeshComponent->AddImpulse(FVector::DownVector * ImpulseStrength);
+			RightWingMeshComponent->AddImpulse(FVector::DownVector * ImpulseStrength);
+			BirdCollider->AddImpulse(FVector::UpVector * ImpulseStrength);
+		}
+		else
+		{
+			LeftWingMeshComponent->AddImpulse(FVector::UpVector * ImpulseStrength);
+			RightWingMeshComponent->AddImpulse(FVector::UpVector * ImpulseStrength);
+			BirdCollider->AddImpulse(FVector::DownVector * ImpulseStrength);
+		}
+		
+		LeftWingMeshComponent->AddImpulse(FVector::RightVector * ImpulseStrength);
+		RightWingMeshComponent->AddImpulse(FVector::RightVector * ImpulseStrength);
+
+		LeftWingMeshComponent->AddImpulse(FVector::ForwardVector * ImpulseStrength / 3);
+		RightWingMeshComponent->AddImpulse(FVector::BackwardVector * ImpulseStrength / 3);
 	}
 }
 
