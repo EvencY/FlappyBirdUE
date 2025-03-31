@@ -22,6 +22,6 @@ This project represents my first venture into game development using C++. While 
 - Menu (currently there's only pause)
 - Background music / sound effects
 - Leaderboard with top 10 scores 
-- Add flying animation for the bird
-- Start screen that will help start game - currently bird starts falling immidiately on start
+- Flying animation for the bird
+- Start screen that will help start the game - currently the bird starts falling immidiately on start
 - UI for start screen, scoring and menu
