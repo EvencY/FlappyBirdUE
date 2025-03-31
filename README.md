@@ -1,4 +1,4 @@
-### This project isn't finished yet ###
+### !WORK IN PROGRESS! ###
 
 ### Flappy Bird ###
 A simple game inspired by the once-popular mobile game.
