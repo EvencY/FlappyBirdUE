@@ -47,7 +47,6 @@ void ABirdPawn::BeginPlay()
 	BirdCollider->SetSimulatePhysics(true);
 
 	BirdCollider->OnComponentHit.AddDynamic(this, &ABirdPawn::OnHit);
-	//BirdCollider->OnComponentBeginOverlap(this, &ABirdPawn::OnHit);
 
 
 	if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(GetWorld()->GetAuthGameMode()))
@@ -85,9 +84,11 @@ void ABirdPawn::HandleJumpInput()
 	{
 		if (RootPrimitive->IsSimulatingPhysics())
 		{
+			// Reset current velocity
 			RootPrimitive->SetPhysicsLinearVelocity(FVector::ZeroVector);
-			FVector UppwardForce = FVector(0, 0, 1000000);
-			RootPrimitive->AddForce(UppwardForce);
+
+			FVector UppwardImpulse = FVector(0, 0, JumpPower);
+			RootPrimitive->AddImpulse(UppwardImpulse, NAME_None, true);
 		}
 	}
 }
@@ -157,6 +158,22 @@ void ABirdPawn::HandleGameStateChanged(EFlappyBirdGameState NewState)
 void ABirdPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (bIsGameOver)
+	{
+		return;
+	}
+
+	// Sometimes after jump the bird doesn't fall.
+	// After jump its Z velocity is dropping to 0 and stops there.
+	// This is the fix - manually adding gravity force
+	if (UPrimitiveComponent* RootPrimitive = Cast<UPrimitiveComponent>(GetRootComponent()))
+	{
+		float GravityZ = GetWorld()->GetGravityZ();
+
+		FVector GravityForce = FVector(0, 0, GravityZ * DeltaTime);
+		RootPrimitive->AddForce(GravityForce);
+	}
 }
 
 // Called to bind functionality to input
@@ -171,5 +188,6 @@ void ABirdPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PauseInputAction->bTriggerWhenPaused = true;
 
 	Input->BindAction(JumpInputAction, ETriggerEvent::Triggered, this, &ABirdPawn::HandleJumpInput);
+	
 }
 

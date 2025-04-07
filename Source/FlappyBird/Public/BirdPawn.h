@@ -37,6 +37,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
 	FVector BirdSpawnPoint = FVector(0.0f, -200.0f, 500.0f);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float JumpPower = 500;
+
 
 	// Need to be set in editor
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

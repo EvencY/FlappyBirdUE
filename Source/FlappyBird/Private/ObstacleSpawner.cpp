@@ -29,6 +29,7 @@ void AObstacleSpawner::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+
 	// Stop when game is over
 	if (bIsGameOver)
 	{
