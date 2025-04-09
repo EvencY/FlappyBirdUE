@@ -52,13 +52,16 @@ protected:
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
-	UStaticMeshComponent* BirdMeshComponent;
+	USkeletalMeshComponent* BirdSkeletalMeshComponent;
 
-	UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
-	UStaticMeshComponent* LeftWingMeshComponent;
+	//UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
+	//UStaticMeshComponent* BirdMeshComponent;
 
-	UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
-	UStaticMeshComponent* RightWingMeshComponent;
+	//UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
+	//UStaticMeshComponent* LeftWingMeshComponent;
+
+	//UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
+	//UStaticMeshComponent* RightWingMeshComponent;
 
 	UFUNCTION(BlueprintCallable)
 	void HandlePauseInput();
