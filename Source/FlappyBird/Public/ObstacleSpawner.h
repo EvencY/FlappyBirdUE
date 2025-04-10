@@ -80,7 +80,8 @@ private:
 	UFUNCTION(BlueprintCallable, Category = "Spawning")
 	float SetSpawnLocationZInRange(float minRange, float maxRange);
 
-	bool bIsGameOver = false;
+	// Don't spawn obstacles at the game start - idle state
+	bool bSpawnObstacles = false;
 
 	void HandleGameStateChanged(EFlappyBirdGameState NewState);
 

@@ -69,10 +69,14 @@ private:
 	UFUNCTION(BlueprintCallable)
 	void HandleJumpInput();
 
+	UFUNCTION(BlueprintCallable)
+	void Jump();
+
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 
 	bool bIsGameOver = false;
+	bool bIsGamePlaying = false;
 
 	void HandleGameStateChanged(EFlappyBirdGameState NewState);
 };

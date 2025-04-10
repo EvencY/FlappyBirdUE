@@ -30,8 +30,7 @@ void AObstacleSpawner::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 
-	// Stop when game is over
-	if (bIsGameOver)
+	if (!bSpawnObstacles)
 	{
 		return;
 	}
@@ -112,9 +111,13 @@ float AObstacleSpawner::SetSpawnLocationZInRange(float minRange, float maxRange)
 
 void AObstacleSpawner::HandleGameStateChanged(EFlappyBirdGameState NewState)
 {
-	if (NewState == EFlappyBirdGameState::GameOver)
+	if (NewState == EFlappyBirdGameState::Playing)
 	{
-		bIsGameOver = true;
+		bSpawnObstacles = true;
+	}
+	else if (NewState == EFlappyBirdGameState::GameOver)
+	{
+		bSpawnObstacles = false;
 	}
 }
 

@@ -17,7 +17,7 @@ void AFlappyBirdGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetGameState(EFlappyBirdGameState::Playing);
+	SetGameState(EFlappyBirdGameState::Idle);
 }
 
 void AFlappyBirdGameMode::SetGameState(EFlappyBirdGameState NewState)
@@ -33,6 +33,10 @@ void AFlappyBirdGameMode::SetGameState(EFlappyBirdGameState NewState)
 
 	switch (CurrentGameState)
 	{
+		case EFlappyBirdGameState::Idle:
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, TEXT("State: Idle"));
+			break;
+
 		case EFlappyBirdGameState::Playing:
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, TEXT("State: Playing"));
 			UGameplayStatics::SetGamePaused(GetWorld(), false);

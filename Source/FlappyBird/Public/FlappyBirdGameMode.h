@@ -13,6 +13,7 @@
 UENUM(BlueprintType)
 enum class EFlappyBirdGameState : uint8
 {
+	Idle,
 	Playing,
 	Paused,
 	GameOver

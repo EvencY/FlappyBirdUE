@@ -83,6 +83,21 @@ void ABirdPawn::HandleJumpInput()
 		return;
 	}
 
+	// Change game state when player jumps first time during idle state - that'll stop idle jumping
+	if(!bIsGamePlaying)
+	{
+		if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(GetWorld()->GetAuthGameMode()))
+		{
+			GameMode->SetGameState(EFlappyBirdGameState::Playing);
+		}
+	}
+	
+
+	Jump();
+}
+
+void ABirdPawn::Jump()
+{
 	if (UPrimitiveComponent* RootPrimitive = Cast<UPrimitiveComponent>(GetRootComponent()))
 	{
 		if (!RootPrimitive->IsSimulatingPhysics())
@@ -153,7 +168,11 @@ void ABirdPawn::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPr
 
 void ABirdPawn::HandleGameStateChanged(EFlappyBirdGameState NewState)
 {
-	if (NewState == EFlappyBirdGameState::GameOver)
+	if (NewState == EFlappyBirdGameState::Playing)
+	{
+		bIsGamePlaying = true;
+	}
+	else if (NewState == EFlappyBirdGameState::GameOver)
 	{
 		bIsGameOver = true;
 	}
@@ -168,6 +187,16 @@ void ABirdPawn::Tick(float DeltaTime)
 	if (bIsGameOver)
 	{
 		return;
+	}
+
+	// Idle jumping at the game start
+	if (!bIsGamePlaying)
+	{
+		// Prevent bird from falling to the ground during idle state
+		if (GetActorLocation().Z < 300.f)
+		{
+			Jump();
+		}
 	}
 
 	// Sometimes after jump the bird doesn't fall.
