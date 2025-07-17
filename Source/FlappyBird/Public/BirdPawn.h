@@ -26,13 +26,11 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
 	class UBoxComponent* BirdCollider;
-	
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	
 
 	UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
 	FVector BirdSpawnPoint = FVector(0.0f, -200.0f, 500.0f);
@@ -41,14 +39,13 @@ protected:
 	float JumpPower = 500;
 
 
-	// Need to be set in editor
+	// Need to be set in the editor
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UInputAction* PauseInputAction;
 
-	// Need to be set in editor
+	// Need to be set in the editor
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UInputAction* JumpInputAction;
-
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
@@ -63,6 +60,9 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
 	UStaticMeshComponent* RightWingMeshComponent;
 
+	UPROPERTY(EditAnywhere, Category = "Move Properties")
+	float MaxJumpBound = 800.f;
+
 	UFUNCTION(BlueprintCallable)
 	void HandlePauseInput();
 
@@ -73,10 +73,16 @@ private:
 	void Jump();
 
 	UFUNCTION()
-	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
+	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent,
+	           FVector NormalImpulse, const FHitResult& Hit);
+
+	UFUNCTION()
+	void RotateBirdBasedOnVelocity(float DeltaTime);
 
 	bool bIsGameOver = false;
 	bool bIsGamePlaying = false;
+
+	float ZVelocity;
 
 	void HandleGameStateChanged(EFlappyBirdGameState NewState);
 };

@@ -6,10 +6,8 @@
 #include <Kismet/GameplayStatics.h>
 
 
-
 AFlappyBirdGameMode::AFlappyBirdGameMode()
 {
-	
 }
 
 
@@ -22,6 +20,7 @@ void AFlappyBirdGameMode::BeginPlay()
 
 void AFlappyBirdGameMode::SetGameState(EFlappyBirdGameState NewState)
 {
+	//Do nothing if the CurrentGameState is the same as NewState
 	if (CurrentGameState == NewState)
 	{
 		return;
@@ -30,6 +29,7 @@ void AFlappyBirdGameMode::SetGameState(EFlappyBirdGameState NewState)
 
 	CurrentGameState = NewState;
 	OnGameStateChanged.Broadcast(CurrentGameState);
+	OnGameStateChangedDynamic.Broadcast(CurrentGameState);
 
 	switch (CurrentGameState)
 	{
@@ -57,4 +57,3 @@ EFlappyBirdGameState AFlappyBirdGameMode::GetCurrentGameState()
 {
 	return CurrentGameState;
 }
-
