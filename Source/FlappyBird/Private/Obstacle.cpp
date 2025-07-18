@@ -7,7 +7,7 @@
 // Sets default values
 AObstacle::AObstacle()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
@@ -21,8 +21,8 @@ AObstacle::AObstacle()
 
 
 	// Obstacle colliders
-	LowerObstacleCollider = CreateDefaultSubobject <UBoxComponent>(TEXT("LowerObstacleCollider"));
-	UpperObstacleCollider = CreateDefaultSubobject <UBoxComponent>(TEXT("UpperObstacleCollider"));
+	LowerObstacleCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("LowerObstacleCollider"));
+	UpperObstacleCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("UpperObstacleCollider"));
 
 	LowerObstacleCollider->InitBoxExtent(FVector(100.f, 100.f, 300.f));
 	UpperObstacleCollider->InitBoxExtent(FVector(100.f, 100.f, 300.f));
@@ -30,12 +30,11 @@ AObstacle::AObstacle()
 	LowerObstacleCollider->SetupAttachment(LowerObstacleMeshComponent);
 	UpperObstacleCollider->SetupAttachment(UpperObstacleMeshComponent);
 
-	
+
 	// Score collider
 	ScoreCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("ScoreCollider"));
 	ScoreCollider->InitBoxExtent(FVector(10.f, 50.f, 80.f));
 	ScoreCollider->SetupAttachment(LowerObstacleMeshComponent);
-
 }
 
 // Called when the game starts or when spawned
@@ -47,9 +46,9 @@ void AObstacle::BeginPlay()
 	// Subscribe to OnGameStateChanged delegate
 	if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(GetWorld()->GetAuthGameMode()))
 	{
-		GameMode->OnGameStateChanged.AddUObject(this, &AObstacle::HandleGameStateChanged);
+		//GameMode->OnGameStateChanged.AddUObject(this, &AObstacle::HandleGameStateChanged);
+		GameMode->OnGameStateChangedDynamic.AddDynamic(this, &AObstacle::HandleGameStateChanged);
 	}
-	
 }
 
 void AObstacle::HandleGameStateChanged(EFlappyBirdGameState NewState)
@@ -67,7 +66,7 @@ void AObstacle::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// If obstacle is hidden do nothing
-	if(IsHidden())
+	if (IsHidden())
 	{
 		return;
 	}
@@ -82,12 +81,9 @@ void AObstacle::Tick(float DeltaTime)
 
 
 	// Deactivate obstacle when it's out of bounds
-	if (GetActorLocation().Y < -YBound) 
+	if (GetActorLocation().Y < -YBound)
 	{
 		SetActorHiddenInGame(true);
 		SetActorEnableCollision(false);
 	}
-
-
 }
-

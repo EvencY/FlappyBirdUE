@@ -12,18 +12,14 @@ UCLASS()
 class FLAPPYBIRD_API AObstacleSpawner : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	AObstacleSpawner();
 
 
-	
-
-
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	
 
 protected:
 	// Called when the game starts or when spawned
@@ -35,8 +31,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
 	float SpawnInterval = 2.f;
-	
-
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Spawning")
@@ -70,11 +64,10 @@ private:
 	float MaxZRange = 150.f;
 
 
-
 	UFUNCTION(BlueprintCallable, Category = "Spawning")
 	void SpawnObstacle();
 
-	UFUNCTION(BlueprintCallable, Category="Spawning")
+	UFUNCTION(BlueprintCallable, Category = "Spawning")
 	void InitializeObstaclePool(int32 PoolSize);
 
 	UFUNCTION(BlueprintCallable, Category = "Spawning")
@@ -83,6 +76,6 @@ private:
 	// Don't spawn obstacles at the game start - idle state
 	bool bSpawnObstacles = false;
 
+	UFUNCTION()
 	void HandleGameStateChanged(EFlappyBirdGameState NewState);
-
 };

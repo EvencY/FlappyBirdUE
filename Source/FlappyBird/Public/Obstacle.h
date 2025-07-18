@@ -12,8 +12,8 @@ UCLASS()
 class FLAPPYBIRD_API AObstacle : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	AObstacle();
 
@@ -28,9 +28,6 @@ public:
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	
-
 
 protected:
 	// Called when the game starts or when spawned
@@ -52,6 +49,6 @@ private:
 
 	bool bIsGameOver = false;
 
+	UFUNCTION()
 	void HandleGameStateChanged(EFlappyBirdGameState NewState);
-
 };

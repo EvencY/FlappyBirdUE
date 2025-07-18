@@ -13,21 +13,14 @@ ABirdPawn::ABirdPawn()
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-
-	//RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
-
 	// Bird collider
 	BirdCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("BirdCollider"));
 	SetRootComponent(BirdCollider);
 	BirdCollider->InitBoxExtent(FVector(5.f, 40.f, 30.f));
 
+	// Bird sleletal mesh
 	BirdSkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("BirdSkeletalMeshComponent"));
 	BirdSkeletalMeshComponent->SetupAttachment(BirdCollider);
-
-
-	// Bird mesh
-	//BirdMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BirdMeshComponent"));
-	//BirdMeshComponent->SetupAttachment(BirdCollider);
 
 	// Wings mesh
 	LeftWingMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LeftWingMeshComponent"));
@@ -51,14 +44,20 @@ void ABirdPawn::BeginPlay()
 
 	BirdCollider->OnComponentHit.AddDynamic(this, &ABirdPawn::OnHit);
 
-
-	if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(GetWorld()->GetAuthGameMode()))
+	World = GetWorld();
+	if (!World)
 	{
-		GameMode->OnGameStateChanged.AddUObject(this, &ABirdPawn::HandleGameStateChanged);
+		UE_LOG(LogTemp, Error, TEXT("BirdPawn::BeginPlay - World is null!"));
+		return;
+	}
+
+	if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(World->GetAuthGameMode()))
+	{
+		//GameMode->OnGameStateChanged.AddUObject(this, &ABirdPawn::HandleGameStateChanged);
+		GameMode->OnGameStateChangedDynamic.AddDynamic(this, &ABirdPawn::HandleGameStateChanged);
 	}
 }
 
-// Called every frame
 void ABirdPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -83,29 +82,57 @@ void ABirdPawn::Tick(float DeltaTime)
 	RotateBirdBasedOnVelocity(DeltaTime);
 
 
-	// Sometimes after a jump the bird doesn't fall.
-	// After jump its Z velocity is dropping to 0 and stops there.
-	// This is the fix - manually adding gravity force
+	/** Sometimes after a jump the bird doesn't fall.
+	 * After jump its Z velocity is dropping to 0 and stops there.
+	 * This is the fix - manually adding gravity force. */
 	if (UPrimitiveComponent* RootPrimitive = Cast<UPrimitiveComponent>(GetRootComponent()))
 	{
-		float GravityZ = GetWorld()->GetGravityZ();
+		if (!World)
+		{
+			UE_LOG(LogTemp, Error, TEXT("BirdPawn::Tick - World is null!"));
+			return;
+		}
+
+		float GravityZ = World->GetGravityZ();
 
 		FVector GravityForce = FVector(0, 0, GravityZ * DeltaTime);
 		RootPrimitive->AddForce(GravityForce);
 	}
 }
 
+void ABirdPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+
+	// Set PauseInputAction and make sure it can be triggered when the game's paused
+	Input->BindAction(PauseInputAction, ETriggerEvent::Triggered, this, &ABirdPawn::HandlePauseInput);
+	PauseInputAction->bTriggerWhenPaused = true;
+
+	Input->BindAction(JumpInputAction, ETriggerEvent::Triggered, this, &ABirdPawn::HandleJumpInput);
+}
+
+#pragma region Bird Actions
 void ABirdPawn::HandlePauseInput()
 {
-	if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(GetWorld()->GetAuthGameMode()))
+	if (!World)
 	{
+		UE_LOG(LogTemp, Error, TEXT("BirdPawn::HandlePauseInput - World is null!"));
+		return;
+	}
+
+	if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(World->GetAuthGameMode()))
+	{
+		EFlappyBirdGameState CurrentState = GameMode->GetCurrentGameState();
+
 		// User can pause if the current state is Playing
-		if (GameMode->GetCurrentGameState() == EFlappyBirdGameState::Playing)
+		if (CurrentState == EFlappyBirdGameState::Playing)
 		{
 			GameMode->SetGameState(EFlappyBirdGameState::Paused);
 		}
 		// If the game is already Paused, resume
-		else if (GameMode->GetCurrentGameState() == EFlappyBirdGameState::Paused)
+		else if (CurrentState == EFlappyBirdGameState::Paused)
 		{
 			GameMode->SetGameState(EFlappyBirdGameState::Playing);
 		}
@@ -122,19 +149,27 @@ void ABirdPawn::HandleJumpInput()
 	// Prevent bird from jumping too high
 	if (GetActorLocation().Z > MaxJumpBound)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Bird is too high!"));
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Bird is too high!"));
+		}
+		return;
+	}
+
+	if (!World)
+	{
+		UE_LOG(LogTemp, Error, TEXT("BirdPawn::HandleJumpInput - World is null!"));
 		return;
 	}
 
 	// Change game state when the player jumps first time during idle state - that'll stop idle jumping
 	if (!bIsGamePlaying)
 	{
-		if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(GetWorld()->GetAuthGameMode()))
+		if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(World->GetAuthGameMode()))
 		{
 			GameMode->SetGameState(EFlappyBirdGameState::Playing);
 		}
 	}
-
 
 	Jump();
 }
@@ -152,21 +187,37 @@ void ABirdPawn::Jump()
 		RootPrimitive->SetPhysicsLinearVelocity(FVector::ZeroVector);
 
 		// Jump impulse
-		FVector UppwardImpulse = FVector(0, 0, JumpPower);
-		RootPrimitive->AddImpulse(UppwardImpulse, NAME_None, true);
+		FVector UpwardImpulse = FVector(0, 0, JumpPower);
+		RootPrimitive->AddImpulse(UpwardImpulse, NAME_None, true);
 	}
 }
 
+#pragma endregion
+
+#pragma region Collision & Death
 void ABirdPawn::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent,
                       FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(GetWorld()->GetAuthGameMode()))
+	if (!World)
+	{
+		UE_LOG(LogTemp, Error, TEXT("BirdPawn::OnHit - World is null!"));
+		return;
+	}
+
+	if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(World->GetAuthGameMode()))
 	{
 		if (GameMode->GetCurrentGameState() == EFlappyBirdGameState::GameOver)
 		{
 			return;
 		}
 		GameMode->SetGameState(EFlappyBirdGameState::GameOver);
+
+		if (!LeftWingMeshComponent || !RightWingMeshComponent || !BirdCollider)
+		{
+			UE_LOG(LogTemp, Error,
+			       TEXT("BirdPawn::OnHit - LeftWingMeshComponent, RightWingMeshComponent or BirdCollider is null!"));
+			return;
+		}
 
 		//Add some effects on death 
 		LeftWingMeshComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
@@ -185,58 +236,33 @@ void ABirdPawn::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPr
 		float WingZPos = LeftWingMeshComponent->GetComponentLocation().Z;
 		float HitZPos = Hit.Location.Z;
 
-		float ImpulseStrength = 1000.0f;
 		float WingDepthDivisor = 3.f;
 
 		// Check whether the hit point was above or below wings to add a proper impulse direction after death
 		if (WingZPos > HitZPos)
 		{
-			LeftWingMeshComponent->AddImpulse(FVector::DownVector * ImpulseStrength);
-			RightWingMeshComponent->AddImpulse(FVector::DownVector * ImpulseStrength);
-			BirdCollider->AddImpulse(FVector::UpVector * ImpulseStrength);
+			LeftWingMeshComponent->AddImpulse(FVector::DownVector * DeathImpulseStrength);
+			RightWingMeshComponent->AddImpulse(FVector::DownVector * DeathImpulseStrength);
+			BirdCollider->AddImpulse(FVector::UpVector * DeathImpulseStrength);
 		}
 		else
 		{
-			LeftWingMeshComponent->AddImpulse(FVector::UpVector * ImpulseStrength);
-			RightWingMeshComponent->AddImpulse(FVector::UpVector * ImpulseStrength);
-			BirdCollider->AddImpulse(FVector::DownVector * ImpulseStrength);
+			LeftWingMeshComponent->AddImpulse(FVector::UpVector * DeathImpulseStrength);
+			RightWingMeshComponent->AddImpulse(FVector::UpVector * DeathImpulseStrength);
+			BirdCollider->AddImpulse(FVector::DownVector * DeathImpulseStrength);
 		}
 
-		LeftWingMeshComponent->AddImpulse(FVector::RightVector * ImpulseStrength);
-		RightWingMeshComponent->AddImpulse(FVector::RightVector * ImpulseStrength);
+		LeftWingMeshComponent->AddImpulse(FVector::RightVector * DeathImpulseStrength);
+		RightWingMeshComponent->AddImpulse(FVector::RightVector * DeathImpulseStrength);
 
-		LeftWingMeshComponent->AddImpulse(FVector::ForwardVector * ImpulseStrength / WingDepthDivisor);
-		RightWingMeshComponent->AddImpulse(FVector::BackwardVector * ImpulseStrength / WingDepthDivisor);
+		LeftWingMeshComponent->AddImpulse(FVector::ForwardVector * DeathImpulseStrength / WingDepthDivisor);
+		RightWingMeshComponent->AddImpulse(FVector::BackwardVector * DeathImpulseStrength / WingDepthDivisor);
 	}
 }
 
-void ABirdPawn::HandleGameStateChanged(EFlappyBirdGameState NewState)
-{
-	if (NewState == EFlappyBirdGameState::Playing)
-	{
-		bIsGamePlaying = true;
-	}
-	else if (NewState == EFlappyBirdGameState::GameOver)
-	{
-		bIsGameOver = true;
-	}
-}
+#pragma endregion
 
-
-// Called to bind functionality to input
-void ABirdPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-
-	// Set PauseInputAction and make sure it can be triggered when the game's paused
-	Input->BindAction(PauseInputAction, ETriggerEvent::Triggered, this, &ABirdPawn::HandlePauseInput);
-	PauseInputAction->bTriggerWhenPaused = true;
-
-	Input->BindAction(JumpInputAction, ETriggerEvent::Triggered, this, &ABirdPawn::HandleJumpInput);
-}
-
+#pragma region Bird Rotation
 void ABirdPawn::RotateBirdBasedOnVelocity(float DeltaTime)
 {
 	ZVelocity = GetVelocity().Z;
@@ -262,4 +288,18 @@ void ABirdPawn::RotateBirdBasedOnVelocity(float DeltaTime)
 	FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, InterpolationSpeed);
 
 	SetActorRotation(NewRotation);
+}
+
+#pragma endregion
+
+void ABirdPawn::HandleGameStateChanged(EFlappyBirdGameState NewState)
+{
+	if (NewState == EFlappyBirdGameState::Playing)
+	{
+		bIsGamePlaying = true;
+	}
+	else if (NewState == EFlappyBirdGameState::GameOver)
+	{
+		bIsGameOver = true;
+	}
 }

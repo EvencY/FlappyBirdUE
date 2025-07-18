@@ -12,8 +12,8 @@ UCLASS()
 class FLAPPYBIRD_API AFloor : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	AFloor();
 
@@ -22,10 +22,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category = "Floor")
 	class UBoxComponent* FloorCollider;
-
-	
-
-	
 
 protected:
 	// Called when the game starts or when spawned
@@ -37,13 +33,13 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Floor")
 	UStaticMeshComponent* FloorMeshComponent2;
 
-private:	
+private:
 	// Must be same as Obstacle MoveSpeed
 	UPROPERTY(VisibleAnywhere, Category = "Floor")
 	FVector MoveSpeed = FVector(0.f, -200.f, 0.f);
 
 	bool bIsGameOver = false;
 
+	UFUNCTION()
 	void HandleGameStateChanged(EFlappyBirdGameState NewState);
-
 };

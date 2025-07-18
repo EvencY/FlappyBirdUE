@@ -7,7 +7,7 @@
 // Sets default values
 AFloor::AFloor()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
@@ -20,7 +20,6 @@ AFloor::AFloor()
 
 	FloorCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("FloorCollider"));
 	FloorCollider->SetupAttachment(RootComponent);
-
 }
 
 // Called when the game starts or when spawned
@@ -32,7 +31,8 @@ void AFloor::BeginPlay()
 	// Subscribe to OnGameStateChanged delegate
 	if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(GetWorld()->GetAuthGameMode()))
 	{
-		GameMode->OnGameStateChanged.AddUObject(this, &AFloor::HandleGameStateChanged);
+		//GameMode->OnGameStateChanged.AddUObject(this, &AFloor::HandleGameStateChanged);
+		GameMode->OnGameStateChangedDynamic.AddDynamic(this, &AFloor::HandleGameStateChanged);
 	}
 }
 
@@ -57,6 +57,4 @@ void AFloor::Tick(float DeltaTime)
 
 	// Move floor to the left with the same speed as Obstacles
 	SetActorLocation(GetActorLocation() + (MoveSpeed * DeltaTime));
-
 }
-

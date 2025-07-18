@@ -6,21 +6,21 @@
 // Sets default values
 AObstacleSpawner::AObstacleSpawner()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 // Called when the game starts or when spawned
 void AObstacleSpawner::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	InitializeObstaclePool(ObstaclePoolSize);
 
 	if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(GetWorld()->GetAuthGameMode()))
 	{
-		GameMode->OnGameStateChanged.AddUObject(this, &AObstacleSpawner::HandleGameStateChanged);
+		//GameMode->OnGameStateChanged.AddUObject(this, &AObstacleSpawner::HandleGameStateChanged);
+		GameMode->OnGameStateChangedDynamic.AddDynamic(this, &AObstacleSpawner::HandleGameStateChanged);
 	}
 }
 
@@ -69,8 +69,6 @@ void AObstacleSpawner::SpawnObstacle()
 			return;
 		}
 	}
-
-	
 }
 
 void AObstacleSpawner::InitializeObstaclePool(int32 PoolSize)
@@ -83,7 +81,8 @@ void AObstacleSpawner::InitializeObstaclePool(int32 PoolSize)
 
 	for (int i = 0; i < PoolSize; i++)
 	{
-		AObstacle* Obstacle = GetWorld()->SpawnActor<AObstacle>(ObstacleClass, FVector::ZeroVector, FRotator::ZeroRotator);
+		AObstacle* Obstacle = GetWorld()->SpawnActor<AObstacle>(ObstacleClass, FVector::ZeroVector,
+		                                                        FRotator::ZeroRotator);
 		Obstacle->SetActorHiddenInGame(true);
 		Obstacle->SetActorEnableCollision(false);
 		ObstaclePool.Add(Obstacle);
@@ -120,4 +119,3 @@ void AObstacleSpawner::HandleGameStateChanged(EFlappyBirdGameState NewState)
 		bSpawnObstacles = false;
 	}
 }
-

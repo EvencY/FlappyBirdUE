@@ -28,7 +28,7 @@ void AFlappyBirdGameMode::SetGameState(EFlappyBirdGameState NewState)
 
 
 	CurrentGameState = NewState;
-	OnGameStateChanged.Broadcast(CurrentGameState);
+	//OnGameStateChanged.Broadcast(CurrentGameState);
 	OnGameStateChangedDynamic.Broadcast(CurrentGameState);
 
 	switch (CurrentGameState)
