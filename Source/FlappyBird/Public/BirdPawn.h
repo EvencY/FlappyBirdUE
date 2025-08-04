@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// evency 2025
 
 #pragma once
 
@@ -6,6 +6,8 @@
 #include "GameFramework/Pawn.h"
 #include <InputMappingContext.h>
 #include <FlappyBirdGameMode.h>
+
+#include "FFlappyBirdConstants.h"
 #include "BirdPawn.generated.h"
 
 
@@ -26,7 +28,7 @@ public:
 
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "BirdPawn")
-	FVector BirdSpawnPoint = FVector(0.0f, -200.0f, 500.0f);
+	FVector BirdSpawnPoint = FFlappyBirdConstants::DEFAULT_BIRD_SPAWN_POSITION;
 
 	/**
 	 * The power of the jump applied to the bird when a jump input is triggered.
@@ -36,7 +38,7 @@ protected:
 	 * Default value: 500.0f
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float JumpPower = 500.f;
+	float JumpPower = FFlappyBirdConstants::DEFAULT_BIRD_JUMP_POWER;
 
 	/**
 	 * The strength of the impulse applied to the bird's components upon collision resulting in death.
@@ -47,7 +49,7 @@ protected:
 	 * Default value: 1000.0f
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float DeathImpulseStrength = 1000.0f;
+	float DeathImpulseStrength = FFlappyBirdConstants::DEFAULT_DEATH_IMPULSE_STRENGTH;
 
 	/** Pause action. Needs to be set in the editor! */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -72,7 +74,7 @@ private:
 	/** Defines the maximum height the bird can jump to. This value is checked to prevent the bird
 	 from exceeding the designated jump boundary during gameplay. */
 	UPROPERTY(EditAnywhere, Category = "Move Properties")
-	float MaxJumpBound = 800.f;
+	float MaxJumpBound = FFlappyBirdConstants::DEFAULT_MAX_JUMP_BOUND;
 
 	UPROPERTY()
 	bool bIsGameOver = false;

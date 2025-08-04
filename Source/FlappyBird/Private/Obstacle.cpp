@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// evency 2025
 
 
 #include "Obstacle.h"
@@ -16,25 +16,39 @@ AObstacle::AObstacle()
 	// Obstacle meshes
 	LowerObstacleMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LowerObstacleMeshComponent"));
 	UpperObstacleMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("UpperObstacleMeshComponent"));
-	LowerObstacleMeshComponent->SetupAttachment(RootComponent);
-	UpperObstacleMeshComponent->SetupAttachment(RootComponent);
+
+	if (LowerObstacleMeshComponent && UpperObstacleMeshComponent)
+	{
+		LowerObstacleMeshComponent->SetupAttachment(RootComponent);
+		UpperObstacleMeshComponent->SetupAttachment(RootComponent);
+	}
 
 
 	// Obstacle colliders
 	LowerObstacleCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("LowerObstacleCollider"));
 	UpperObstacleCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("UpperObstacleCollider"));
 
-	LowerObstacleCollider->InitBoxExtent(FVector(100.f, 100.f, 300.f));
-	UpperObstacleCollider->InitBoxExtent(FVector(100.f, 100.f, 300.f));
+	if (LowerObstacleCollider && UpperObstacleCollider)
+	{
+		LowerObstacleCollider->InitBoxExtent(FVector(100.f, 100.f, 300.f));
+		UpperObstacleCollider->InitBoxExtent(FVector(100.f, 100.f, 300.f));
 
-	LowerObstacleCollider->SetupAttachment(LowerObstacleMeshComponent);
-	UpperObstacleCollider->SetupAttachment(UpperObstacleMeshComponent);
+		LowerObstacleCollider->SetupAttachment(LowerObstacleMeshComponent);
+		UpperObstacleCollider->SetupAttachment(UpperObstacleMeshComponent);
 
+		LowerObstacleCollider->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		UpperObstacleCollider->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	}
 
 	// Score collider
 	ScoreCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("ScoreCollider"));
-	ScoreCollider->InitBoxExtent(FVector(10.f, 50.f, 80.f));
-	ScoreCollider->SetupAttachment(LowerObstacleMeshComponent);
+
+	if (ScoreCollider)
+	{
+		ScoreCollider->InitBoxExtent(FVector(10.f, 50.f, 80.f));
+		ScoreCollider->SetupAttachment(LowerObstacleMeshComponent);
+		ScoreCollider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -42,14 +56,40 @@ void AObstacle::BeginPlay()
 {
 	Super::BeginPlay();
 
+	UWorld* World = GetWorld();
+
+	if (!World)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Obstacle::BeginPlay - World is null!"));
+		return;
+	}
 
 	// Subscribe to OnGameStateChanged delegate
-	if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(GetWorld()->GetAuthGameMode()))
+	if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(World->GetAuthGameMode()))
 	{
-		//GameMode->OnGameStateChanged.AddUObject(this, &AObstacle::HandleGameStateChanged);
 		GameMode->OnGameStateChangedDynamic.AddDynamic(this, &AObstacle::HandleGameStateChanged);
 	}
 }
+
+void AObstacle::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UWorld* World = GetWorld();
+
+	if (!World)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Obstacle::EndPlay - World is null!"));
+		return;
+	}
+
+	//Cleanup delegate subscription
+	if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(World->GetAuthGameMode()))
+	{
+		GameMode->OnGameStateChangedDynamic.RemoveDynamic(this, &AObstacle::HandleGameStateChanged);
+	}
+
+	Super::EndPlay(EndPlayReason);
+}
+
 
 void AObstacle::HandleGameStateChanged(EFlappyBirdGameState NewState)
 {
@@ -60,27 +100,20 @@ void AObstacle::HandleGameStateChanged(EFlappyBirdGameState NewState)
 }
 
 
-// Called every frame
 void AObstacle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// If obstacle is hidden do nothing
-	if (IsHidden())
+	// Do nothing if the obstacle is hidden or the game is over
+	if (IsHidden() || bIsGameOver)
 	{
 		return;
 	}
 
-	if (bIsGameOver)
-	{
-		return;
-	}
-
-	//When obstacle isn't hidden and game is not over move obstacle
-	SetActorLocation(GetActorLocation() + (MoveSpeed * DeltaTime));
+	AddActorWorldOffset(MoveSpeed * DeltaTime);
 
 
-	// Deactivate obstacle when it's out of bounds
+	// Deactivate the obstacle when it's out of bounds
 	if (GetActorLocation().Y < -YBound)
 	{
 		SetActorHiddenInGame(true);

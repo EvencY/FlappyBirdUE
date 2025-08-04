@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// evency 2025
 
 
 #include "ObstacleSpawner.h"
@@ -17,9 +17,16 @@ void AObstacleSpawner::BeginPlay()
 
 	InitializeObstaclePool(ObstaclePoolSize);
 
-	if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(GetWorld()->GetAuthGameMode()))
+	UWorld* World = GetWorld();
+
+	if (!World)
 	{
-		//GameMode->OnGameStateChanged.AddUObject(this, &AObstacleSpawner::HandleGameStateChanged);
+		UE_LOG(LogTemp, Error, TEXT("World is null!"));
+		return;
+	}
+	if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(World->GetAuthGameMode()))
+	{
+		CachedGameMode = GameMode;
 		GameMode->OnGameStateChangedDynamic.AddDynamic(this, &AObstacleSpawner::HandleGameStateChanged);
 	}
 }
@@ -46,6 +53,37 @@ void AObstacleSpawner::Tick(float DeltaTime)
 	}
 }
 
+void AObstacleSpawner::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	//Unbind the delegate if GameMode is still valid
+	if (CachedGameMode.IsValid())
+	{
+		CachedGameMode->OnGameStateChangedDynamic.RemoveDynamic(this, &AObstacleSpawner::HandleGameStateChanged);
+		CachedGameMode.Reset();
+	}
+
+	//Clean up obstacle pool
+	CleanupObstaclePool();
+
+	Super::EndPlay(EndPlayReason);
+}
+
+void AObstacleSpawner::CleanupObstaclePool()
+{
+	//Destroy all obstacles in the pool
+	for (AObstacle* Obstacle : ObstaclePool)
+	{
+		if (IsValid(Obstacle))
+		{
+			Obstacle->Destroy();
+		}
+	}
+
+	//Clear the pool array
+	ObstaclePool.Empty();
+}
+
+
 void AObstacleSpawner::SpawnObstacle()
 {
 	if (!ObstacleClass)
@@ -54,10 +92,10 @@ void AObstacleSpawner::SpawnObstacle()
 		return;
 	}
 
-	// Get hidden obstacle from pool and activate it
+	// Get a hidden obstacle from the pool and activate it
 	for (AObstacle* Obstacle : ObstaclePool)
 	{
-		if (Obstacle->IsHidden())
+		if (Obstacle && Obstacle->IsHidden())
 		{
 			Obstacle->SetActorLocation(SpawnPosition);
 			Obstacle->SetActorRotation(SpawnRotation);
@@ -69,6 +107,8 @@ void AObstacleSpawner::SpawnObstacle()
 			return;
 		}
 	}
+
+	UE_LOG(LogTemp, Warning, TEXT("No available obstacles in the pool!"));
 }
 
 void AObstacleSpawner::InitializeObstaclePool(int32 PoolSize)
@@ -79,13 +119,33 @@ void AObstacleSpawner::InitializeObstaclePool(int32 PoolSize)
 		return;
 	}
 
+	if (PoolSize <= 0)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Invalid pool size: %d"), PoolSize);
+		return;
+	}
+
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		UE_LOG(LogTemp, Error, TEXT("World is null!"));
+		return;
+	}
+
 	for (int i = 0; i < PoolSize; i++)
 	{
-		AObstacle* Obstacle = GetWorld()->SpawnActor<AObstacle>(ObstacleClass, FVector::ZeroVector,
-		                                                        FRotator::ZeroRotator);
-		Obstacle->SetActorHiddenInGame(true);
-		Obstacle->SetActorEnableCollision(false);
-		ObstaclePool.Add(Obstacle);
+		AObstacle* Obstacle = World->SpawnActor<AObstacle>(ObstacleClass, FVector::ZeroVector,
+		                                                   FRotator::ZeroRotator);
+		if (Obstacle)
+		{
+			Obstacle->SetActorHiddenInGame(true);
+			Obstacle->SetActorEnableCollision(false);
+			ObstaclePool.Add(Obstacle);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to spawn obstacle!"));
+		}
 	}
 }
 

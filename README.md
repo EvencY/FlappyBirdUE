@@ -15,6 +15,7 @@ This project represents my first venture into game development using C++. While 
 - Controller/keyboard support
 - Obstacle pooling system
 - Crash effects - wing deatachment, impulse force
+- Bird animations state machine
 
 
 ### Planned features ###
@@ -22,6 +23,5 @@ This project represents my first venture into game development using C++. While 
 - Menu (currently there's only pause)
 - Background music / sound effects
 - Leaderboard with top 10 scores 
-- Flying animation for the bird
 - Start screen that will help start the game - currently the bird starts falling immidiately on start
 - UI for start screen, scoring and menu

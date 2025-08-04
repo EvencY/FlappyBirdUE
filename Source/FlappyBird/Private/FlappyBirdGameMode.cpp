@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// evency 2025
 
 
 #include "FlappyBirdGameMode.h"
@@ -28,27 +28,38 @@ void AFlappyBirdGameMode::SetGameState(EFlappyBirdGameState NewState)
 
 
 	CurrentGameState = NewState;
-	//OnGameStateChanged.Broadcast(CurrentGameState);
 	OnGameStateChangedDynamic.Broadcast(CurrentGameState);
+
+	UWorld* World = GetWorld();
 
 	switch (CurrentGameState)
 	{
 		case EFlappyBirdGameState::Idle:
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, TEXT("State: Idle"));
 			break;
 
 		case EFlappyBirdGameState::Playing:
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, TEXT("State: Playing"));
-			UGameplayStatics::SetGamePaused(GetWorld(), false);
+			if (World)
+			{
+				UGameplayStatics::SetGamePaused(World, false);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("AFlappyBirdGameMode::SetGameState - World is null!"));
+			}
 			break;
 
 		case EFlappyBirdGameState::Paused:
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, TEXT("State: Paused"));
-			UGameplayStatics::SetGamePaused(GetWorld(), true);
+			if (World)
+			{
+				UGameplayStatics::SetGamePaused(World, true);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("AFlappyBirdGameMode::SetGameState - World is null!"));
+			}
 			break;
 
 		case EFlappyBirdGameState::GameOver:
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, TEXT("State: Game Over"));
 			break;
 	}
 }

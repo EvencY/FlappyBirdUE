@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// evency 2025
 
 #pragma once
 

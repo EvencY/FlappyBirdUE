@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// evency 2025
 
 
 #include "FloorSpawner.h"
@@ -6,12 +6,10 @@
 // Sets default values
 AFloorSpawner::AFloorSpawner()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
-// Called when the game starts or when spawned
+
 void AFloorSpawner::BeginPlay()
 {
 	Super::BeginPlay();
@@ -22,37 +20,62 @@ void AFloorSpawner::BeginPlay()
 		return;
 	}
 
+	if (!FloorPool[0] || !FloorPool[1])
+	{
+		UE_LOG(LogTemp, Error, TEXT("FloorPool should contain valid objects!"));
+		return;
+	}
+
 	DistanceBetweenFloorParts = FMath::Abs(FloorPool[0]->GetActorLocation().Y - FloorPool[1]->GetActorLocation().Y);
+
+	if (DistanceBetweenFloorParts < KINDA_SMALL_NUMBER)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Floor objects are at nearly identical Y positions!"));
+	}
 
 	SetLeftFloorIndex();
 }
 
-// Called every frame
 void AFloorSpawner::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// When left Floor object is out of bonds move it just behind right Floor
+	//Early return if not properly initialized
+	if (FloorPool.Num() != 2 || !FloorPool[LeftFloorIndex] || DistanceBetweenFloorParts <= 0.f)
+	{
+		return;
+	}
+
+	// When the left Floor object is out of bonds move it just behind the right Floor
 	if (FloorPool[LeftFloorIndex]->GetActorLocation().Y < YBound)
 	{
 		FloorPool[LeftFloorIndex]->SetActorLocation(
 			FloorPool[LeftFloorIndex]->GetActorLocation() +
-			FVector(0.f, DistanceBetweenFloorParts * 2, 0.f)
+			FVector(0.f, DistanceBetweenFloorParts * 2.f, 0.f)
 		);
 
-		// LeftFloorIndex points to object that is right and it needs to be set again
+		// LeftFloorIndex points to an object that is right, and it needs to be set again
 		SetLeftFloorIndex();
 	}
 }
 
 void AFloorSpawner::SetLeftFloorIndex()
 {
-	for (int i = 0; i < FloorPool.Num(); i++)
+	if (FloorPool.Num() == 2 && FloorPool[0] && FloorPool[1])
 	{
-		if (FloorPool[i]->GetActorLocation().Y < FloorPool[LeftFloorIndex]->GetActorLocation().Y)
+		LeftFloorIndex = (FloorPool[0]->GetActorLocation().Y < FloorPool[1]->GetActorLocation().Y) ? 0 : 1;
+		return;
+	}
+
+	if (FloorPool.Num() > 0 && FloorPool[0])
+	{
+		LeftFloorIndex = 0;
+		for (int i = 1; i < FloorPool.Num(); i++)
 		{
-			LeftFloorIndex = i;
+			if (FloorPool[i] && FloorPool[i]->GetActorLocation().Y < FloorPool[LeftFloorIndex]->GetActorLocation().Y)
+			{
+				LeftFloorIndex = i;
+			}
 		}
 	}
 }
-

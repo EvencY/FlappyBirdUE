@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// evency 2025
 
 
 #include "Floor.h"
@@ -7,7 +7,6 @@
 // Sets default values
 AFloor::AFloor()
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
@@ -27,13 +26,38 @@ void AFloor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	UWorld* World = GetWorld();
+
+	if (!World)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Floor::BeginPlay - World is null!"));
+		return;
+	}
 
 	// Subscribe to OnGameStateChanged delegate
-	if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(GetWorld()->GetAuthGameMode()))
+	if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(World->GetAuthGameMode()))
 	{
 		//GameMode->OnGameStateChanged.AddUObject(this, &AFloor::HandleGameStateChanged);
 		GameMode->OnGameStateChangedDynamic.AddDynamic(this, &AFloor::HandleGameStateChanged);
 	}
+}
+
+void AFloor::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	//Clean up delegate subscription
+	UWorld* World = GetWorld();
+
+	if (!World)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Floor::EndPlay - World is null!"));
+	}
+
+	if (AFlappyBirdGameMode* GameMode = Cast<AFlappyBirdGameMode>(World->GetAuthGameMode()))
+	{
+		GameMode->OnGameStateChangedDynamic.RemoveDynamic(this, &AFloor::HandleGameStateChanged);
+	}
+
+	Super::EndPlay(EndPlayReason);
 }
 
 void AFloor::HandleGameStateChanged(EFlappyBirdGameState NewState)
@@ -41,6 +65,10 @@ void AFloor::HandleGameStateChanged(EFlappyBirdGameState NewState)
 	if (NewState == EFlappyBirdGameState::GameOver)
 	{
 		bIsGameOver = true;
+	}
+	else if (NewState == EFlappyBirdGameState::Playing)
+	{
+		bIsGameOver = false;
 	}
 }
 
@@ -56,5 +84,5 @@ void AFloor::Tick(float DeltaTime)
 	}
 
 	// Move floor to the left with the same speed as Obstacles
-	SetActorLocation(GetActorLocation() + (MoveSpeed * DeltaTime));
+	AddActorWorldOffset(MoveSpeed * DeltaTime);
 }
